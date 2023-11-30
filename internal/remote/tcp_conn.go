@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,6 +32,22 @@ type tcpConnWrapper struct {
 	net.Conn
 	sync.Mutex
 	closed atomic.Bool
+}
+
+func fixIPv6URL(addr string) string {
+	// 1.1.1.1:10911
+	// 22da:d3:0:2f3a::2000:10911
+
+	if strings.Contains(addr, "[") {
+		return addr
+	}
+
+	parts := strings.Split(addr, ":")
+	if len(parts) <= 2 {
+		return addr
+	}
+
+	return "[" + strings.Join(parts[:len(parts)-1], ":") + "]:" + parts[len(parts)-1]
 }
 
 func initConn(ctx context.Context, addr string, config *RemotingClientConfig) (*tcpConnWrapper, error) {
