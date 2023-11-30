@@ -58,11 +58,11 @@ func initConn(ctx context.Context, addr string, config *RemotingClientConfig) (*
 	var conn net.Conn
 	var err error
 	if config.UseTls {
-		conn, err = tls.DialWithDialer(&d, "tcp", addr, &tls.Config{
+		conn, err = tls.DialWithDialer(&d, "tcp", fixIPv6URL(addr), &tls.Config{
 			InsecureSkipVerify: true,
 		})
 	} else {
-		conn, err = d.DialContext(ctx, "tcp", addr)
+		conn, err = d.DialContext(ctx, "tcp", fixIPv6URL(addr))
 	}
 
 	if err != nil {
